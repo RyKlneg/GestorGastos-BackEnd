@@ -2,31 +2,32 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ExpensesModule } from './expenses/expenses.module';
-import { Expense } from './expenses/entities/expense.entity';
 
 @Module({
   imports: [
+    // Carga variables de entorno (Railway)
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
     }),
+
+    // TypeORM usando DATABASE_URL (Railway)
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
-        host: configService.get<string>('DB_HOST'),
-        port: configService.get<number>('DB_PORT'),
-        username: configService.get<string>('DB_USERNAME'),
-        password: configService.get<string>('DB_PASSWORD'),
-        database: configService.get<string>('DB_DATABASE'),
-        entities: [Expense],
-        synchronize: configService.get<string>('NODE_ENV') === 'development',
-        logging: configService.get<string>('NODE_ENV') === 'development',
+        url: configService.get<string>('DATABASE_URL'),
+        autoLoadEntities: true,
+        synchronize: true, // ⚠️ solo para desarrollo
+        ssl: {
+          rejectUnauthorized: false,
+        },
       }),
     }),
+
     ExpensesModule,
   ],
 })
 export class AppModule {}
+
 
