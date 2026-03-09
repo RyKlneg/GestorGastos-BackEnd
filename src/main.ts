@@ -1,29 +1,23 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  const configService = app.get(ConfigService);
-  const port = configService.get<number>('PORT') || 3001;
-  const corsOrigin = configService.get<string>('CORS_ORIGIN') || 'http://localhost:3001';
-
-  // Enable CORS
+  // CORS (Railway + Vercel)
   app.enableCors({
-    origin: corsOrigin,
-    credentials: true,
+    origin: '*',
   });
 
-  // Global prefix for API routes
+  // Prefijo global de la API
   app.setGlobalPrefix('api');
 
-  // Global exception filter
+  // Filtro global de excepciones
   app.useGlobalFilters(new HttpExceptionFilter());
 
-  // Global validation pipe
+  // Validaciones globales
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -35,9 +29,11 @@ async function bootstrap() {
     }),
   );
 
+  // Puerto dinámico (Railway)
+  const port = Number(process.env.PORT) || 3000;
   await app.listen(port);
-  console.log(`Application is running on: http://localhost:${port}/api`);
 }
 
 bootstrap();
+
 
