@@ -22,6 +22,9 @@ import { Expense } from './expenses/entities/expense.entity';
         entities: [Expense],
         synchronize: configService.get<string>('NODE_ENV') === 'development',
         logging: configService.get<string>('NODE_ENV') === 'development',
+        ssl: configService.get<string>('DB_SSL') === 'true'
+          ? { rejectUnauthorized: false }
+          : false,
       }),
     }),
 
